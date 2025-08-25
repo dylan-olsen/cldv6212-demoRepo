@@ -18,6 +18,10 @@ namespace retailMvcDemo
             // Register the blob service via its interface
             builder.Services.AddSingleton<IBlobService, BlobService>();
 
+            // registering the queue service
+            builder.Services.AddSingleton<IQueueService, QueueService>();
+
+
             // 2) Build
             var app = builder.Build();
 

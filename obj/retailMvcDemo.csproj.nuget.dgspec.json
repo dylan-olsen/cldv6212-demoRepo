@@ -61,6 +61,10 @@
             "Azure.Storage.Blobs": {
               "target": "Package",
               "version": "[12.25.0, )"
+            },
+            "Azure.Storage.Queues": {
+              "target": "Package",
+              "version": "[12.23.0, )"
             }
           },
           "imports": [

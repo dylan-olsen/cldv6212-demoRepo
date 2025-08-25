@@ -1,37 +1,46 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using retailMvcDemo.Models;
 using retailMvcDemo.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace retailMvcDemo.Controllers
 {
     public class CustomersController : Controller
     {
-        private readonly CustomerTableService _svc;
+        private readonly CustomerTableService _customers;
+        private readonly IQueueService _queue;
 
-        public CustomersController(CustomerTableService svc)
+        public CustomersController(CustomerTableService customers, IQueueService queue)
         {
-            _svc = svc;
+            _customers = customers;
+            _queue = queue;
         }
 
         // GET /Customers?city=Durban
         public async Task<IActionResult> Index(string? city = null)
         {
-            var items = new List<CustomerEntity>();
-
+            var list = new List<CustomerEntity>();
             if (string.IsNullOrWhiteSpace(city))
             {
-                await foreach (var c in _svc.QueryAllAsync())
-                    items.Add(c);
+                await foreach (var c in _customers.QueryAllAsync()) list.Add(c);
             }
             else
             {
                 var pk = $"CITY-{city.ToUpper()}";
-                await foreach (var c in _svc.QueryByPartitionAsync(pk))
-                    items.Add(c);
+                await foreach (var c in _customers.QueryByPartitionAsync(pk)) list.Add(c);
             }
+            return View(list.OrderByDescending(c => c.Timestamp));
+        }
 
-            // Show newest first
-            return View(items.OrderByDescending(x => x.Timestamp));
+        // GET /Customers/Details?pk=...&rk=...
+        public async Task<IActionResult> Details(string pk, string rk)
+        {
+            var row = await _customers.GetAsync(pk, rk);
+            if (row == null) return NotFound();
+            return View(row);
         }
 
         // GET /Customers/Create
@@ -42,15 +51,24 @@ namespace retailMvcDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string firstName, string lastName, string email, string phone, string city)
         {
-            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) ||
-                string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(city))
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(city))
             {
-                ModelState.AddModelError("", "Please fill in First Name, Last Name, Email and City.");
+                ModelState.AddModelError("", "First name, last name, and city are required.");
                 return View();
             }
 
-            var entity = _svc.Build(firstName, lastName, email, phone, city);
-            await _svc.AddAsync(entity);
+            var entity = _customers.Build(firstName, lastName, email, phone, city);
+            await _customers.AddAsync(entity);
+
+            // queue: customer-created
+            await _queue.EnqueueOrderAsync(new
+            {
+                type = "customer-created",
+                customerId = entity.RowKey,
+                cityPartition = entity.PartitionKey,  // e.g., CITY-DURBAN
+                name = $"{entity.FirstName} {entity.LastName}",
+                utc = DateTime.UtcNow
+            });
 
             return RedirectToAction(nameof(Index), new { city });
         }
@@ -58,7 +76,7 @@ namespace retailMvcDemo.Controllers
         // GET /Customers/Edit?pk=...&rk=...
         public async Task<IActionResult> Edit(string pk, string rk)
         {
-            var row = await _svc.GetAsync(pk, rk);
+            var row = await _customers.GetAsync(pk, rk);
             if (row == null) return NotFound();
             return View(row);
         }
@@ -66,25 +84,40 @@ namespace retailMvcDemo.Controllers
         // POST /Customers/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string pk, string rk, string firstName, string lastName, string email, string phone, string? city)
+        public async Task<IActionResult> Edit(string pk, string rk, string firstName, string lastName, string email, string phone, string city)
         {
-            var row = await _svc.GetAsync(pk, rk);
+            var row = await _customers.GetAsync(pk, rk);
             if (row == null) return NotFound();
 
             row.FirstName = firstName;
             row.LastName = lastName;
             row.Email = email;
             row.Phone = phone;
-            row.City = city;
 
-            await _svc.UpdateAsync(row);
+            // If city changed, we should move partitions (Table Storage requires re-insert)
+            var newPk = $"CITY-{city.ToUpper()}";
+            if (!string.Equals(row.PartitionKey, newPk, StringComparison.OrdinalIgnoreCase))
+            {
+                // delete old row and create a new one with same RowKey in new partition
+                var preservedRk = row.RowKey;
+
+                await _customers.DeleteAsync(row.PartitionKey, row.RowKey);
+                row.PartitionKey = newPk;
+                row.RowKey = preservedRk; // keep same ID
+                await _customers.AddAsync(row);
+            }
+            else
+            {
+                await _customers.UpdateAsync(row);
+            }
+
             return RedirectToAction(nameof(Index), new { city });
         }
 
         // GET /Customers/Delete?pk=...&rk=...
         public async Task<IActionResult> Delete(string pk, string rk)
         {
-            var row = await _svc.GetAsync(pk, rk);
+            var row = await _customers.GetAsync(pk, rk);
             if (row == null) return NotFound();
             return View(row);
         }
@@ -92,18 +125,20 @@ namespace retailMvcDemo.Controllers
         // POST /Customers/DeleteConfirmed
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string pk, string rk, string? city)
+        public async Task<IActionResult> DeleteConfirmed(string pk, string rk)
         {
-            await _svc.DeleteAsync(pk, rk);
-            return RedirectToAction(nameof(Index), new { city });
-        }
+            await _customers.DeleteAsync(pk, rk);
 
-        // Optional: quick details view
-        public async Task<IActionResult> Details(string pk, string rk)
-        {
-            var row = await _svc.GetAsync(pk, rk);
-            if (row == null) return NotFound();
-            return View(row);
+            // queue: customer-deleted
+            await _queue.EnqueueOrderAsync(new
+            {
+                type = "customer-deleted",
+                customerId = rk,
+                partitionKey = pk,
+                utc = DateTime.UtcNow
+            });
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

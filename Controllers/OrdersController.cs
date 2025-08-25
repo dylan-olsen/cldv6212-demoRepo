@@ -2,7 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using retailMvcDemo.Models;
 using retailMvcDemo.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace retailMvcDemo.Controllers
 {
@@ -11,15 +15,21 @@ namespace retailMvcDemo.Controllers
         private readonly OrderTableService _orders;
         private readonly CustomerTableService _customers;
         private readonly ProductTableService _products;
+        private readonly IQueueService _queue;
 
-        public OrdersController(OrderTableService orders, CustomerTableService customers, ProductTableService products)
+        public OrdersController(
+            OrderTableService orders,
+            CustomerTableService customers,
+            ProductTableService products,
+            IQueueService queue)
         {
             _orders = orders;
             _customers = customers;
             _products = products;
+            _queue = queue;
         }
 
-        // GET /Orders?customerId=<RowKey>
+        // GET /Orders?customerId=...
         public async Task<IActionResult> Index(string? customerId = null)
         {
             var list = new List<OrderEntity>();
@@ -35,6 +45,7 @@ namespace retailMvcDemo.Controllers
             return View(list.OrderByDescending(o => o.Timestamp));
         }
 
+        // GET /Orders/Details?pk=...&rk=...
         public async Task<IActionResult> Details(string pk, string rk)
         {
             var row = await _orders.GetAsync(pk, rk);
@@ -59,7 +70,13 @@ namespace retailMvcDemo.Controllers
             // Display: "Rk - Name (R price)"
             ViewBag.Products = products
                 .OrderBy(p => p.Name)
-                .Select(p => new { Rk = p.RowKey, Name = p.Name, Price = p.Price, Display = $"{p.RowKey} - {p.Name} (R {p.Price:0.00})" })
+                .Select(p => new
+                {
+                    Rk = p.RowKey,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Display = $"{p.RowKey} - {p.Name} (R {p.Price:0.00})"
+                })
                 .ToList();
 
             // Simple statuses list for the dropdown
@@ -71,22 +88,31 @@ namespace retailMvcDemo.Controllers
         // CREATE (POST): compute price + total on server (secure)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string customerId, string productRowKey, int quantity, string status)
+        public async Task<IActionResult> Create(string customerId, string productId, int quantity, string status)
         {
-            if (string.IsNullOrWhiteSpace(customerId))
-                ModelState.AddModelError("", "Please select a customer.");
-            if (string.IsNullOrWhiteSpace(productRowKey))
-                ModelState.AddModelError("", "Please select a product.");
-            if (quantity <= 0)
-                ModelState.AddModelError("", "Quantity must be at least 1.");
-
-            if (!ModelState.IsValid) return await Create();
-
-            // Look up product by RowKey (we don't know the category/PartitionKey, so query by RowKey)
-            ProductEntity? product = null;
-            await foreach (var p in _products.QueryAsync(x => x.RowKey == productRowKey))
+            if (string.IsNullOrWhiteSpace(customerId) || string.IsNullOrWhiteSpace(productId) || quantity <= 0)
             {
-                product = p; break;
+                ModelState.AddModelError("", "Customer, Product, and positive Quantity are required.");
+                return await Create();
+            }
+
+            // Validate customer exists
+            CustomerEntity? customer = null;
+            await foreach (var c in _customers.QueryAllAsync())
+            {
+                if (c.RowKey == customerId) { customer = c; break; }
+            }
+            if (customer == null)
+            {
+                ModelState.AddModelError("", "Selected customer not found.");
+                return await Create();
+            }
+
+            // Find product to fetch authoritative price
+            ProductEntity? product = null;
+            await foreach (var p in _products.QueryAllAsync())
+            {
+                if (p.RowKey == productId) { product = p; break; }
             }
             if (product == null)
             {
@@ -110,6 +136,28 @@ namespace retailMvcDemo.Controllers
             };
 
             await _orders.AddAsync(order);
+
+            // ───────────── Queue messages ─────────────
+            await _queue.EnqueueOrderAsync(new
+            {
+                type = "order-created",
+                orderId = order.RowKey,
+                customerId = order.CustomerId,
+                total = order.Total,
+                utc = DateTime.UtcNow
+            });
+
+            // Optional inventory reservation / decrement signal
+            await _queue.EnqueueOrderAsync(new
+            {
+                type = "inventory-reserve",
+                productId = product.RowKey,
+                qty = quantity,
+                orderId = order.RowKey,
+                utc = DateTime.UtcNow
+            });
+            // ─────────────────────────────────────────
+
             return RedirectToAction(nameof(Index), new { customerId });
         }
 
@@ -122,24 +170,19 @@ namespace retailMvcDemo.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string pk, string rk, string itemsJson, double total, string status)
+        public async Task<IActionResult> Edit(string pk, string rk, string status)
         {
             var row = await _orders.GetAsync(pk, rk);
             if (row == null) return NotFound();
 
-            try { JsonDocument.Parse(string.IsNullOrWhiteSpace(itemsJson) ? "[]" : itemsJson); }
-            catch { ModelState.AddModelError("", "Items JSON is invalid."); return View(row); }
-
-            row.ItemsJson = string.IsNullOrWhiteSpace(itemsJson) ? "[]" : itemsJson;
-            row.Total = total;
             row.Status = string.IsNullOrWhiteSpace(status) ? row.Status : status;
-
             await _orders.UpdateAsync(row);
 
-            var cid = row.PartitionKey.StartsWith("CUSTOMER-") ? row.PartitionKey["CUSTOMER-".Length..] : null;
+            string? cid = row.PartitionKey.StartsWith("CUSTOMER-") ? row.PartitionKey["CUSTOMER-".Length..] : null;
             return RedirectToAction(nameof(Index), new { customerId = cid });
         }
 
+        // GET /Orders/Delete?pk=...&rk=...
         public async Task<IActionResult> Delete(string pk, string rk)
         {
             var row = await _orders.GetAsync(pk, rk);

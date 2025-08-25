@@ -69,6 +69,22 @@
           }
         }
       },
+      "Azure.Storage.Queues/12.23.0": {
+        "type": "package",
+        "dependencies": {
+          "Azure.Storage.Common": "12.24.0"
+        },
+        "compile": {
+          "lib/net8.0/Azure.Storage.Queues.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Azure.Storage.Queues.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Bcl.AsyncInterfaces/8.0.0": {
         "type": "package",
         "compile": {
@@ -249,6 +265,28 @@
         "lib/net8.0/Azure.Storage.Common.xml",
         "lib/netstandard2.0/Azure.Storage.Common.dll",
         "lib/netstandard2.0/Azure.Storage.Common.xml"
+      ]
+    },
+    "Azure.Storage.Queues/12.23.0": {
+      "sha512": "8uhYJvlUPrXwD5uxC2L4uPYogk/9VpI1309lwcSku8+odNdAWLlZBAeVfwwZVRSPOGOhWBc/m2LKT/u0D2V+4w==",
+      "type": "package",
+      "path": "azure.storage.queues/12.23.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "CHANGELOG.md",
+        "README.md",
+        "azure.storage.queues.12.23.0.nupkg.sha512",
+        "azure.storage.queues.nuspec",
+        "azureicon.png",
+        "lib/net6.0/Azure.Storage.Queues.dll",
+        "lib/net6.0/Azure.Storage.Queues.xml",
+        "lib/net8.0/Azure.Storage.Queues.dll",
+        "lib/net8.0/Azure.Storage.Queues.xml",
+        "lib/netstandard2.0/Azure.Storage.Queues.dll",
+        "lib/netstandard2.0/Azure.Storage.Queues.xml",
+        "lib/netstandard2.1/Azure.Storage.Queues.dll",
+        "lib/netstandard2.1/Azure.Storage.Queues.xml"
       ]
     },
     "Microsoft.Bcl.AsyncInterfaces/8.0.0": {
@@ -464,7 +502,8 @@
     "net9.0": [
       "Azure.Core >= 1.47.2",
       "Azure.Data.Tables >= 12.11.0",
-      "Azure.Storage.Blobs >= 12.25.0"
+      "Azure.Storage.Blobs >= 12.25.0",
+      "Azure.Storage.Queues >= 12.23.0"
     ]
   },
   "packageFolders": {
@@ -528,6 +567,10 @@
           "Azure.Storage.Blobs": {
             "target": "Package",
             "version": "[12.25.0, )"
+          },
+          "Azure.Storage.Queues": {
+            "target": "Package",
+            "version": "[12.23.0, )"
           }
         },
         "imports": [

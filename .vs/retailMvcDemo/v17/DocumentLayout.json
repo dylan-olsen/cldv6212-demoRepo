@@ -3,12 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\views\\products\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:views\\products\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\controllers\\customerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:controllers\\customerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\services\\queueservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:services\\queueservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\views\\products\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:views\\products\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\services\\producttableservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -17,10 +37,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\views\\orders\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:views\\orders\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\views\\orders\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -37,10 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\views\\orders\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:views\\orders\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\services\\ordertableservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -63,16 +75,8 @@
       "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:views\\products\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\controllers\\customerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:controllers\\customerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\services\\blobservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:services\\blobservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{AF72C12F-D799-4CBB-B215-78A41DEC609F}|retailMvcDemo.csproj|c:\\users\\dylan\\source\\repos\\vc college\\retailmvcdemo\\views\\customers\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -130,7 +134,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
@@ -139,55 +143,97 @@
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "Delete.cshtml",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Delete.cshtml",
-              "RelativeDocumentMoniker": "Views\\Orders\\Delete.cshtml",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Delete.cshtml",
-              "RelativeToolTip": "Views\\Orders\\Delete.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-08-25T09:54:13.458Z"
+              "Title": "QueueService.cs",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Services\\QueueService.cs",
+              "RelativeDocumentMoniker": "Services\\QueueService.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Services\\QueueService.cs",
+              "RelativeToolTip": "Services\\QueueService.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAAIwCoAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-25T11:38:32.722Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Create.cshtml",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Create.cshtml",
-              "RelativeDocumentMoniker": "Views\\Orders\\Create.cshtml",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Create.cshtml",
-              "RelativeToolTip": "Views\\Orders\\Create.cshtml",
-              "ViewState": "AgIAABoAAAAAAAAAAAAYwCMAAAAVAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-08-25T09:52:36.556Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "OrdersController.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\OrdersController.cs",
               "RelativeDocumentMoniker": "Controllers\\OrdersController.cs",
               "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\OrdersController.cs",
               "RelativeToolTip": "Controllers\\OrdersController.cs",
-              "ViewState": "AgIAAIkAAAAAAAAAAAAwwJAAAAAYAAAAAAAAAA==",
+              "ViewState": "AgIAALMAAAAAAAAAAAAcwLkAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-25T09:52:07.494Z"
+              "WhenOpened": "2025-08-25T09:52:07.494Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
+              "Title": "ProductsController.cs",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\ProductsController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ProductsController.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\ProductsController.cs",
+              "RelativeToolTip": "Controllers\\ProductsController.cs",
+              "ViewState": "AgIAAJwAAAAAAAAAAAAcwK4AAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-25T08:40:31.073Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Program.cs*",
+              "RelativeToolTip": "Program.cs*",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAqwBQAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-19T11:45:22.338Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\appsettings.json*",
+              "RelativeToolTip": "appsettings.json*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-08-19T11:37:29.877Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CustomersController.cs",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\CustomersController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CustomersController.cs",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\CustomersController.cs",
+              "RelativeToolTip": "Controllers\\CustomersController.cs",
+              "ViewState": "AgIAAHYAAAAAAAAAAAAIwJAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-19T11:46:23.536Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Products\\Create.cshtml",
               "RelativeDocumentMoniker": "Views\\Products\\Create.cshtml",
               "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Products\\Create.cshtml",
               "RelativeToolTip": "Views\\Products\\Create.cshtml",
-              "ViewState": "AgIAABIAAAAAAAAAAAAYwB0AAAA4AAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAAAYwB8AAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-08-25T08:41:30.136Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 7,
               "Title": "ProductTableService.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Services\\ProductTableService.cs",
               "RelativeDocumentMoniker": "Services\\ProductTableService.cs",
@@ -199,19 +245,31 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ProductsController.cs",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\ProductsController.cs",
-              "RelativeDocumentMoniker": "Controllers\\ProductsController.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\ProductsController.cs",
-              "RelativeToolTip": "Controllers\\ProductsController.cs",
-              "ViewState": "AgIAACwAAAAAAAAAAAAwwEAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-25T08:40:31.073Z"
+              "DocumentIndex": 8,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Create.cshtml",
+              "RelativeDocumentMoniker": "Views\\Orders\\Create.cshtml",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Create.cshtml",
+              "RelativeToolTip": "Views\\Orders\\Create.cshtml",
+              "ViewState": "AgIAABoAAAAAAAAAAAAYwCMAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-08-25T09:52:36.556Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 9,
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Delete.cshtml",
+              "RelativeDocumentMoniker": "Views\\Orders\\Delete.cshtml",
+              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Delete.cshtml",
+              "RelativeToolTip": "Views\\Orders\\Delete.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-08-25T09:54:13.458Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Edit.cshtml",
               "RelativeDocumentMoniker": "Views\\Orders\\Edit.cshtml",
@@ -223,7 +281,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 11,
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Details.cshtml",
               "RelativeDocumentMoniker": "Views\\Orders\\Details.cshtml",
@@ -235,7 +293,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 12,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Orders\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Orders\\Index.cshtml",
@@ -247,7 +305,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 13,
               "Title": "OrderTableService.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Services\\OrderTableService.cs",
               "RelativeDocumentMoniker": "Services\\OrderTableService.cs",
@@ -259,7 +317,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 15,
               "Title": "Delete.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Products\\Delete.cshtml",
               "RelativeDocumentMoniker": "Views\\Products\\Delete.cshtml",
@@ -271,7 +329,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 16,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Products\\Edit.cshtml",
               "RelativeDocumentMoniker": "Views\\Products\\Edit.cshtml",
@@ -283,7 +341,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 17,
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Products\\Details.cshtml",
               "RelativeDocumentMoniker": "Views\\Products\\Details.cshtml",
@@ -295,19 +353,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAIAAAAAAAAAAAAqwBIAAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-19T11:45:22.338Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 18,
               "Title": "BlobService.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Services\\BlobService.cs",
               "RelativeDocumentMoniker": "Services\\BlobService.cs",
@@ -319,7 +365,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 14,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Products\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Products\\Index.cshtml",
@@ -331,31 +377,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\appsettings.json",
-              "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\appsettings.json",
-              "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-19T11:37:29.877Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "CustomersController.cs",
-              "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\CustomersController.cs",
-              "RelativeDocumentMoniker": "Controllers\\CustomersController.cs",
-              "ToolTip": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Controllers\\CustomersController.cs",
-              "RelativeToolTip": "Controllers\\CustomersController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGYAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-19T11:46:23.536Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Customers\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Customers\\Index.cshtml",
@@ -367,7 +389,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Customers\\Create.cshtml",
               "RelativeDocumentMoniker": "Views\\Customers\\Create.cshtml",
@@ -379,7 +401,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "Details.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Customers\\Details.cshtml",
               "RelativeDocumentMoniker": "Views\\Customers\\Details.cshtml",
@@ -391,7 +413,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "Delete.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Customers\\Delete.cshtml",
               "RelativeDocumentMoniker": "Views\\Customers\\Delete.cshtml",
@@ -403,7 +425,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
@@ -415,7 +437,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 24,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Customers\\Edit.cshtml",
               "RelativeDocumentMoniker": "Views\\Customers\\Edit.cshtml",
@@ -427,7 +449,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
@@ -439,7 +461,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "CustomerTableService.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Services\\CustomerTableService.cs",
               "RelativeDocumentMoniker": "Services\\CustomerTableService.cs",
@@ -451,7 +473,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "TableRepositoryBase.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Services\\TableRepositoryBase.cs",
               "RelativeDocumentMoniker": "Services\\TableRepositoryBase.cs",
@@ -463,7 +485,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "CustomerEntity.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Models\\CustomerEntity.cs",
               "RelativeDocumentMoniker": "Models\\CustomerEntity.cs",
@@ -475,7 +497,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "ProductEntity.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Models\\ProductEntity.cs",
               "RelativeDocumentMoniker": "Models\\ProductEntity.cs",
@@ -487,7 +509,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "OrderEntity.cs",
               "DocumentMoniker": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\Models\\OrderEntity.cs",
               "RelativeDocumentMoniker": "Models\\OrderEntity.cs",
