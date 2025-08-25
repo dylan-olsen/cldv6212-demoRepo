@@ -1,54 +1,136 @@
-﻿@{
+﻿@model retailMvcDemo.Models.OrderCreateVM
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
     ViewData["Title"] = "Create Order";
-    var customers = (IEnumerable<dynamic>)ViewBag.Customers;
-    var products = (IEnumerable<dynamic>)ViewBag.Products;
-    var statuses = (IEnumerable<string>)ViewBag.Statuses;
+    var customers = ViewBag.Customers as List<SelectListItem> ?? new();
+    var products = ViewBag.Products as List<SelectListItem> ?? new();
+    var statuses = ViewBag.Statuses as List<SelectListItem> ?? new();
 }
-<h2>Create Order</h2>
 
-<form asp-action="Create" method="post" class="row g-3">
-    @Html.AntiForgeryToken()
+<h2 class="mb-3">Create Order</h2>
 
-    <div class="col-md-6">
-        <label class="form-label">Customer</label>
-        <select name="customerId" class="form-select" required>
-            <option value="">-- select customer --</option>
-            @foreach (var c in customers)
-            {
-                <option value="@c.Id">@c.Name (@c.Id)</option>
-            }
-        </select>
+<form asp-action="Create" method="post" class="needs-validation" novalidate>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label asp-for="CustomerId" class="form-label">Customer</label>
+                    <select asp-for="CustomerId" class="form-select" asp-items="customers">
+                        <option value="">-- select customer --</option>
+                    </select>
+                    <span asp-validation-for="CustomerId" class="text-danger"></span>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="Status" class="form-label">Status</label>
+                    <select asp-for="Status" class="form-select" asp-items="statuses"></select>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-6">
-        <label class="form-label">Product</label>
-        <select name="productRowKey" class="form-select" required>
-            <option value="">-- select product --</option>
-            @foreach (var p in products)
-            {
-                <option value="@p.Rk">@p.Display</option>
-            }
-        </select>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Order Lines</h5>
+            <table class="table table-sm align-middle" id="linesTable">
+                <thead>
+                    <tr>
+                        <th style="width:60%">Product</th>
+                        <th style="width:20%">Quantity</th>
+                        <th style="width:20%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Items.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                <select class="form-select" name="Items[@i].ProductId" value="@Model.Items[i].ProductId">
+                                    <option value="">-- select product --</option>
+                                    @foreach (var p in products)
+                                    {
+                                        <option value="@p.Value" selected="@(p.Value == Model.Items[i].ProductId)">
+                                            @p.Text
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <input class="form-control" type="number" min="1" name="Items[@i].Quantity" value="@(Model.Items[i].Quantity)" />
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)">Remove</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addRowBtn">+ Add product</button>
+        </div>
     </div>
 
-    <div class="col-md-3">
-        <label class="form-label">Quantity</label>
-        <input type="number" name="quantity" min="1" value="1" class="form-control" required />
-    </div>
-
-    <div class="col-md-3">
-        <label class="form-label">Status</label>
-        <select name="status" class="form-select">
-            @foreach (var s in statuses)
-            {
-                <option value="@s">@s</option>
-            }
-        </select>
-    </div>
-
-    <div class="col-12">
+    <div class="mt-3 d-flex gap-2">
         <button type="submit" class="btn btn-primary">Create</button>
         <a asp-action="Index" class="btn btn-secondary">Cancel</a>
     </div>
+
+    <div class="mt-3 text-danger">
+        @Html.ValidationSummary(excludePropertyErrors: true)
+    </div>
 </form>
+
+<!-- Row template (hidden) -->
+<table class="d-none">
+    <tbody id="rowTemplate">
+        <tr>
+            <td>
+                <select class="form-select product-select">
+                    <option value="">-- select product --</option>
+                    @foreach (var p in products)
+                    {
+                        <option value="@p.Value">@p.Text</option>
+                    }
+                </select>
+            </td>
+            <td>
+                <input class="form-control qty-input" type="number" min="1" value="1" />
+            </td>
+            <td class="text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(this)">Remove</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        const tableBody = document.querySelector('#linesTable tbody');
+        const template  = document.querySelector('#rowTemplate tr');
+        const addBtn    = document.querySelector('#addRowBtn');
+
+        function reindex() {
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach((row, i) => {
+                const prod = row.querySelector('.product-select');
+                const qty  = row.querySelector('.qty-input');
+                prod.setAttribute('name', `Items[${i}].ProductId`);
+                qty.setAttribute('name',  `Items[${i}].Quantity`);
+            });
+        }
+
+        function removeRow(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            reindex();
+        }
+
+        addBtn.addEventListener('click', () => {
+            const clone = template.cloneNode(true);
+            clone.querySelector('.product-select').classList.add('product-select');
+            clone.querySelector('.qty-input').classList.add('qty-input');
+            tableBody.appendChild(clone);
+            reindex();
+        });
+    </script>
+}
 

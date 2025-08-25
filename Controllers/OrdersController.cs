@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using retailMvcDemo.Models;
 using retailMvcDemo.Services;
 using System;
@@ -53,91 +54,113 @@ namespace retailMvcDemo.Controllers
             return View(row);
         }
 
-        // CREATE (GET): dropdowns for customer + product
-        public async Task<IActionResult> Create()
+        // ---------- Create (multi-product) ----------
+
+        // Populate dropdowns for Create GET and failed POST
+        private async Task PopulateDropdownsAsync()
         {
             var customers = new List<CustomerEntity>();
             await foreach (var c in _customers.QueryAllAsync()) customers.Add(c);
 
+            ViewBag.Customers = customers
+                .OrderBy(c => c.LastName)
+                .Select(c => new SelectListItem($"{c.FirstName} {c.LastName}", c.RowKey))
+                .ToList();
+
             var products = new List<ProductEntity>();
             await foreach (var p in _products.QueryAllAsync()) products.Add(p);
 
-            ViewBag.Customers = customers
-                .OrderBy(c => c.LastName)
-                .Select(c => new { Id = c.RowKey, Name = $"{c.FirstName} {c.LastName}" })
-                .ToList();
-
-            // Display: "Rk - Name (R price)"
             ViewBag.Products = products
                 .OrderBy(p => p.Name)
-                .Select(p => new
-                {
-                    Rk = p.RowKey,
-                    Name = p.Name,
-                    Price = p.Price,
-                    Display = $"{p.RowKey} - {p.Name} (R {p.Price:0.00})"
-                })
+                .Select(p => new SelectListItem($"{p.Name} (R {p.Price:0.00})", p.RowKey))
                 .ToList();
 
-            // Simple statuses list for the dropdown
-            ViewBag.Statuses = new[] { "Pending", "Processing", "Completed", "Cancelled" };
-
-            return View();
+            ViewBag.Statuses = new List<SelectListItem>
+            {
+                new("Pending", "Pending"),
+                new("Processing", "Processing"),
+                new("Completed", "Completed"),
+                new("Cancelled", "Cancelled")
+            };
         }
 
-        // CREATE (POST): compute price + total on server (secure)
+        // GET /Orders/Create
+        public async Task<IActionResult> Create()
+        {
+            await PopulateDropdownsAsync();
+            var vm = new OrderCreateVM
+            {
+                Status = "Pending",
+                Items = new List<OrderCreateItemVM> { new OrderCreateItemVM { Quantity = 1 } }
+            };
+            return View(vm);
+        }
+
+        // POST /Orders/Create (multi-product; preserves selections on error)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string customerId, string productId, int quantity, string status)
+        public async Task<IActionResult> Create(OrderCreateVM vm)
         {
-            if (string.IsNullOrWhiteSpace(customerId) || string.IsNullOrWhiteSpace(productId) || quantity <= 0)
-            {
-                ModelState.AddModelError("", "Customer, Product, and positive Quantity are required.");
-                return await Create();
-            }
+            if (vm.Items == null || vm.Items.Count == 0)
+                ModelState.AddModelError("", "Add at least one product.");
 
-            // Validate customer exists
+            // Validate customer
             CustomerEntity? customer = null;
             await foreach (var c in _customers.QueryAllAsync())
-            {
-                if (c.RowKey == customerId) { customer = c; break; }
-            }
+                if (c.RowKey == vm.CustomerId) { customer = c; break; }
+
             if (customer == null)
-            {
                 ModelState.AddModelError("", "Selected customer not found.");
-                return await Create();
+
+            if (!ModelState.IsValid)
+            {
+                await PopulateDropdownsAsync();
+                return View(vm); // preserves user input
             }
 
-            // Find product to fetch authoritative price
-            ProductEntity? product = null;
-            await foreach (var p in _products.QueryAllAsync())
+            // Materialize products and compute total from authoritative prices
+            var allProducts = new List<ProductEntity>();
+            await foreach (var p in _products.QueryAllAsync()) allProducts.Add(p);
+
+            var lines = new List<object>();
+            double total = 0;
+
+            foreach (var item in vm.Items.Where(i => !string.IsNullOrWhiteSpace(i.ProductId) && i.Quantity > 0))
             {
-                if (p.RowKey == productId) { product = p; break; }
-            }
-            if (product == null)
-            {
-                ModelState.AddModelError("", "Selected product not found.");
-                return await Create();
+                var prod = allProducts.FirstOrDefault(p => p.RowKey == item.ProductId);
+                if (prod == null)
+                {
+                    ModelState.AddModelError("", "One or more selected products no longer exist.");
+                    await PopulateDropdownsAsync();
+                    return View(vm);
+                }
+
+                lines.Add(new { sku = prod.RowKey, name = prod.Name, qty = item.Quantity, price = prod.Price });
+                total += item.Quantity * prod.Price;
             }
 
-            // compute totals using authoritative price
-            var line = new { sku = product.RowKey, name = product.Name, qty = quantity, price = product.Price };
-            var itemsJson = JsonSerializer.Serialize(new[] { line });
-            var total = quantity * product.Price;
+            if (lines.Count == 0)
+            {
+                ModelState.AddModelError("", "Add at least one valid product with quantity > 0.");
+                await PopulateDropdownsAsync();
+                return View(vm);
+            }
+
+            var itemsJson = JsonSerializer.Serialize(lines);
 
             var order = new OrderEntity
             {
-                PartitionKey = $"CUSTOMER-{customerId}",
+                PartitionKey = $"CUSTOMER-{vm.CustomerId}",
                 RowKey = Guid.NewGuid().ToString("N"),
-                CustomerId = customerId,
+                CustomerId = vm.CustomerId!,
                 ItemsJson = itemsJson,
                 Total = total,
-                Status = string.IsNullOrWhiteSpace(status) ? "Pending" : status
+                Status = string.IsNullOrWhiteSpace(vm.Status) ? "Pending" : vm.Status
             };
 
             await _orders.AddAsync(order);
 
-            // ───────────── Queue messages ─────────────
+            // Queue: order-created
             await _queue.EnqueueOrderAsync(new
             {
                 type = "order-created",
@@ -147,19 +170,23 @@ namespace retailMvcDemo.Controllers
                 utc = DateTime.UtcNow
             });
 
-            // Optional inventory reservation / decrement signal
-            await _queue.EnqueueOrderAsync(new
+            // Queue: inventory-reserve per line (optional but useful)
+            foreach (var item in vm.Items.Where(i => !string.IsNullOrWhiteSpace(i.ProductId) && i.Quantity > 0))
             {
-                type = "inventory-reserve",
-                productId = product.RowKey,
-                qty = quantity,
-                orderId = order.RowKey,
-                utc = DateTime.UtcNow
-            });
-            // ─────────────────────────────────────────
+                await _queue.EnqueueOrderAsync(new
+                {
+                    type = "inventory-reserve",
+                    productId = item.ProductId!,
+                    qty = item.Quantity,
+                    orderId = order.RowKey,
+                    utc = DateTime.UtcNow
+                });
+            }
 
-            return RedirectToAction(nameof(Index), new { customerId });
+            return RedirectToAction(nameof(Index), new { customerId = vm.CustomerId });
         }
+
+        // ---------- Edit / Delete (unchanged behavior) ----------
 
         public async Task<IActionResult> Edit(string pk, string rk)
         {
@@ -203,4 +230,5 @@ namespace retailMvcDemo.Controllers
             return RedirectToAction(nameof(Index), new { customerId = cid });
         }
     }
+
 }
