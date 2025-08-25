@@ -69,6 +69,22 @@
           }
         }
       },
+      "Azure.Storage.Files.Shares/12.23.0": {
+        "type": "package",
+        "dependencies": {
+          "Azure.Storage.Common": "12.24.0"
+        },
+        "compile": {
+          "lib/net8.0/Azure.Storage.Files.Shares.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Azure.Storage.Files.Shares.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Azure.Storage.Queues/12.23.0": {
         "type": "package",
         "dependencies": {
@@ -265,6 +281,26 @@
         "lib/net8.0/Azure.Storage.Common.xml",
         "lib/netstandard2.0/Azure.Storage.Common.dll",
         "lib/netstandard2.0/Azure.Storage.Common.xml"
+      ]
+    },
+    "Azure.Storage.Files.Shares/12.23.0": {
+      "sha512": "w3jiDByPHLjzo6EnrvHiAikvjQ8u0MAktmltOydDgVU3XH2W/nrJcH5EA3uCjvyjraWJ3++pvRkqxfCSCkzaHQ==",
+      "type": "package",
+      "path": "azure.storage.files.shares/12.23.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "CHANGELOG.md",
+        "README.md",
+        "azure.storage.files.shares.12.23.0.nupkg.sha512",
+        "azure.storage.files.shares.nuspec",
+        "azureicon.png",
+        "lib/net6.0/Azure.Storage.Files.Shares.dll",
+        "lib/net6.0/Azure.Storage.Files.Shares.xml",
+        "lib/net8.0/Azure.Storage.Files.Shares.dll",
+        "lib/net8.0/Azure.Storage.Files.Shares.xml",
+        "lib/netstandard2.0/Azure.Storage.Files.Shares.dll",
+        "lib/netstandard2.0/Azure.Storage.Files.Shares.xml"
       ]
     },
     "Azure.Storage.Queues/12.23.0": {
@@ -503,6 +539,7 @@
       "Azure.Core >= 1.47.2",
       "Azure.Data.Tables >= 12.11.0",
       "Azure.Storage.Blobs >= 12.25.0",
+      "Azure.Storage.Files.Shares >= 12.23.0",
       "Azure.Storage.Queues >= 12.23.0"
     ]
   },
@@ -567,6 +604,10 @@
           "Azure.Storage.Blobs": {
             "target": "Package",
             "version": "[12.25.0, )"
+          },
+          "Azure.Storage.Files.Shares": {
+            "target": "Package",
+            "version": "[12.23.0, )"
           },
           "Azure.Storage.Queues": {
             "target": "Package",

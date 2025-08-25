@@ -1,0 +1,42 @@
+﻿@model IReadOnlyList<retailMvcDemo.Models.ContractFileViewModel>
+@{
+    ViewData["Title"] = "Contracts (Azure Files)";
+}
+<h2 class="mb-3">@ViewData["Title"]</h2>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success">@TempData["Msg"]</div>
+}
+
+<div class="mb-2">
+    <a asp-action="Upload" class="btn btn-primary btn-sm">+ Upload Contract</a>
+</div>
+
+<table class="table table-sm table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th class="text-end">Size</th>
+            <th>Last Modified</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var f in Model)
+        {
+            <tr>
+                <td class="text-truncate" style="max-width: 420px">@f.Name</td>
+                <td class="text-end">@string.Format("{0:0.0} KB", f.Bytes / 1024.0)</td>
+                <td>@(f.LastModified?.LocalDateTime.ToString("yyyy-MM-dd HH:mm"))</td>
+                <td class="text-end">
+                    <a asp-action="Download" asp-route-name="@f.Name" class="btn btn-outline-secondary btn-sm">Download</a>
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        <input type="hidden" name="name" value="@f.Name" />
+                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this file?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -21,6 +21,10 @@ namespace retailMvcDemo
             // registering the queue service
             builder.Services.AddSingleton<IQueueService, QueueService>();
 
+            // registering the file share service 
+            builder.Services.AddSingleton<IFileShareService, FileShareService>();
+
+
 
             // 2) Build
             var app = builder.Build();
