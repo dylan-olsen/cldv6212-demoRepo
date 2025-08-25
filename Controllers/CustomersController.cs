@@ -44,31 +44,56 @@ namespace retailMvcDemo.Controllers
         }
 
         // GET /Customers/Create
-        public IActionResult Create()
-        {
-            // Use a fresh model so TagHelpers bind correctly
-            return View(new CustomerEntity());
-        }
+        public IActionResult Create() => View(new CustomerEntity());
 
-        // POST /Customers/Create  (uses DataAnnotations on CustomerEntity)
+        // POST /Customers/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CustomerEntity model)
         {
-            // NOTE: City is optional on the model, but required for PartitionKey
+            // PartitionKey/RowKey are non-nullable, so MVC treats them as required.
+            // We generate them server-side, so remove them from ModelState.
+            ModelState.Remove(nameof(CustomerEntity.PartitionKey));
+            ModelState.Remove(nameof(CustomerEntity.RowKey));
+
             if (string.IsNullOrWhiteSpace(model.City))
                 ModelState.AddModelError(nameof(CustomerEntity.City), "City is required.");
 
-            if (!ModelState.IsValid)
-                return View(model); // show validation messages inline
+            // Uniqueness: email (global)
+            if (!string.IsNullOrWhiteSpace(model.Email))
+            {
+                await foreach (var c in _customers.QueryAllAsync())
+                {
+                    if (string.Equals(c.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModelState.AddModelError(nameof(CustomerEntity.Email), "That email is already in use.");
+                        break;
+                    }
+                }
+            }
 
-            // Build keys
+            // Uniqueness: phone (global) – optional field, only check when provided
+            if (!string.IsNullOrWhiteSpace(model.Phone))
+            {
+                await foreach (var c in _customers.QueryAllAsync())
+                {
+                    if (string.Equals(c.Phone, model.Phone, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModelState.AddModelError(nameof(CustomerEntity.Phone), "That phone number is already in use.");
+                        break;
+                    }
+                }
+            }
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Keys
             model.PartitionKey = $"CITY-{model.City!.Trim().ToUpper()}";
             model.RowKey = Guid.NewGuid().ToString("N");
 
             await _customers.AddAsync(model);
 
-            // queue: customer-created
             await _queue.EnqueueOrderAsync(new
             {
                 type = "customer-created",
@@ -86,7 +111,6 @@ namespace retailMvcDemo.Controllers
         {
             var row = await _customers.GetAsync(pk, rk);
             if (row == null) return NotFound();
-            // Populate City from PK if needed
             if (string.IsNullOrWhiteSpace(row.City) && pk.StartsWith("CITY-"))
                 row.City = pk.Substring("CITY-".Length);
             return View(row);
@@ -97,9 +121,28 @@ namespace retailMvcDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CustomerEntity model)
         {
-            // Model contains keys bound from hidden inputs
+            // we expect PK/RK to come back via hidden fields
             if (string.IsNullOrWhiteSpace(model.City))
                 ModelState.AddModelError(nameof(CustomerEntity.City), "City is required.");
+
+            // Uniqueness checks (exclude the current customer by RowKey)
+            await foreach (var c in _customers.QueryAllAsync())
+            {
+                if (c.RowKey == model.RowKey) continue;
+
+                if (!string.IsNullOrWhiteSpace(model.Email) &&
+                    string.Equals(c.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(nameof(CustomerEntity.Email), "That email is already in use.");
+                    break;
+                }
+                if (!string.IsNullOrWhiteSpace(model.Phone) &&
+                    string.Equals(c.Phone, model.Phone, StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(nameof(CustomerEntity.Phone), "That phone number is already in use.");
+                    break;
+                }
+            }
 
             if (!ModelState.IsValid)
                 return View(model);
@@ -113,14 +156,14 @@ namespace retailMvcDemo.Controllers
             existing.Phone = model.Phone;
             existing.City = model.City;
 
-            // Detect city change (partition move)
+            // Handle city change (partition move)
             var newPk = $"CITY-{model.City!.Trim().ToUpper()}";
             if (!string.Equals(existing.PartitionKey, newPk, StringComparison.OrdinalIgnoreCase))
             {
-                var preservedRk = existing.RowKey;
+                var rk = existing.RowKey;
                 await _customers.DeleteAsync(existing.PartitionKey, existing.RowKey);
                 existing.PartitionKey = newPk;
-                existing.RowKey = preservedRk;
+                existing.RowKey = rk;
                 await _customers.AddAsync(existing);
             }
             else
@@ -139,7 +182,7 @@ namespace retailMvcDemo.Controllers
             return View(row);
         }
 
-        // POST /Customers/DeleteConfirmed
+        // POST /Customers/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string pk, string rk)

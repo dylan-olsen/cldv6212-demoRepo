@@ -1,42 +1,69 @@
-﻿@model IEnumerable<retailMvcDemo.Models.OrderEntity>
+﻿@model IEnumerable<retailMvcDemo.Controllers.OrderListVM>
 @{
     ViewData["Title"] = "Orders";
-    string CustomerFromPk(string pk) =>
-        pk != null && pk.StartsWith("CUSTOMER-") ? pk.Substring("CUSTOMER-".Length) : pk ?? "";
 }
-<h2>Orders</h2>
 
-<p>
-    <a asp-action="Create" class="btn btn-sm btn-success">Create Order</a>
-</p>
+<h2 class="mb-3">@ViewData["Title"]</h2>
 
-<table class="table table-striped table-hover align-middle">
-    <thead>
-        <tr>
-            <th>CustomerId</th>
-            <th>OrderId</th>
-            <th class="text-end">Total</th>
-            <th>Status</th>
-            <th>Timestamp</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var o in Model)
-        {
-            <tr>
-                <td>@CustomerFromPk(o.PartitionKey)</td>
-                <td>@o.RowKey</td>
-                <td class="text-end">@o.Total.ToString("0.00")</td>
-                <td>@o.Status</td>
-                <td>@o.Timestamp</td>
-                <td>
-                    <a asp-action="Details" asp-route-pk="@o.PartitionKey" asp-route-rk="@o.RowKey" class="btn btn-sm btn-outline-secondary">Details</a>
-                    <a asp-action="Edit" asp-route-pk="@o.PartitionKey" asp-route-rk="@o.RowKey" class="btn btn-sm btn-primary">Edit</a>
-                    <a asp-action="Delete" asp-route-pk="@o.PartitionKey" asp-route-rk="@o.RowKey" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3">
+
+    <!-- + New Order card -->
+    <div class="col">
+        <a class="card h-100 text-decoration-none border-2 border-dashed d-flex align-items-center justify-content-center"
+           href="@Url.Action("Create", "Orders")"
+           style="border-style: dashed;">
+            <div class="text-center p-4">
+                <div class="display-6">+</div>
+                <div class="mt-1">New Order</div>
+            </div>
+        </a>
+    </div>
+
+    @foreach (var o in Model)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0 text-truncate" title="@o.CustomerName">@o.CustomerName</h5>
+                        <span class="badge text-bg-light">@o.Status</span>
+                    </div>
+
+                    <div class="mb-1">
+                        <div><strong>Total:</strong> R @o.Total.ToString("0.00")</div>
+                        <div><strong>Items:</strong> @o.ItemsCount</div>
+                    </div>
+
+                    <div class="text-muted small mt-auto">
+                        @if (o.Timestamp.HasValue)
+                        {
+                            <span>@o.Timestamp.Value.LocalDateTime.ToString("yyyy-MM-dd HH:mm")</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white border-0 pt-0">
+                    <div class="dropstart">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("Details", "Orders", new { pk = o.PartitionKey, rk = o.RowKey })">Details</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("Edit", "Orders", new { pk = o.PartitionKey, rk = o.RowKey })">Edit</a>
+                            </li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="@Url.Action("Delete", "Orders", new { pk = o.PartitionKey, rk = o.RowKey })">Delete</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using retailMvcDemo.Models;
 using retailMvcDemo.Services;
 using System;
@@ -11,6 +10,33 @@ using System.Threading.Tasks;
 
 namespace retailMvcDemo.Controllers
 {
+    // Lightweight VM for the Orders index grid/cards
+    public class OrderListVM
+    {
+        public string PartitionKey { get; set; } = default!;
+        public string RowKey { get; set; } = default!;
+        public string CustomerId { get; set; } = default!;
+        public string CustomerName { get; set; } = "";
+        public string Status { get; set; } = "Pending";
+        public double Total { get; set; }
+        public DateTimeOffset? Timestamp { get; set; }
+        public int ItemsCount { get; set; }
+    }
+
+    // These two VMs match the Create page you’re using
+    public class OrderCreateItemVM
+    {
+        public string? ProductId { get; set; }
+        public int Quantity { get; set; } = 1;
+    }
+
+    public class OrderCreateVM
+    {
+        public string? CustomerId { get; set; }
+        public List<OrderCreateItemVM> Items { get; set; } = new();
+        public string Status { get; set; } = "Pending";
+    }
+
     public class OrdersController : Controller
     {
         private readonly OrderTableService _orders;
@@ -31,19 +57,71 @@ namespace retailMvcDemo.Controllers
         }
 
         // GET /Orders?customerId=...
+        // Returns a compact list with CustomerName + ItemsCount (no scary GUIDs on the UI)
         public async Task<IActionResult> Index(string? customerId = null)
         {
-            var list = new List<OrderEntity>();
+            // Load orders (optionally filtered)
+            var orders = new List<OrderEntity>();
             if (string.IsNullOrWhiteSpace(customerId))
             {
-                await foreach (var o in _orders.QueryAllAsync()) list.Add(o);
+                await foreach (var o in _orders.QueryAllAsync()) orders.Add(o);
             }
             else
             {
                 var pk = $"CUSTOMER-{customerId}";
-                await foreach (var o in _orders.QueryByPartitionAsync(pk)) list.Add(o);
+                await foreach (var o in _orders.QueryByPartitionAsync(pk)) orders.Add(o);
             }
-            return View(list.OrderByDescending(o => o.Timestamp));
+
+            // Build set of customer ids we need to resolve to names
+            var wanted = orders
+                .Select(o => o.CustomerId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            // Map RowKey -> "First Last"
+            var nameById = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            await foreach (var c in _customers.QueryAllAsync())
+            {
+                if (wanted.Contains(c.RowKey))
+                {
+                    nameById[c.RowKey] = $"{c.FirstName} {c.LastName}".Trim();
+                    if (nameById.Count == wanted.Count) break;
+                }
+            }
+
+            // Shape into the list VM + count items per order
+            var model = orders
+                .OrderByDescending(o => o.Timestamp)
+                .Select(o =>
+                {
+                    int count = 0;
+                    try
+                    {
+                        if (!string.IsNullOrWhiteSpace(o.ItemsJson))
+                        {
+                            using var doc = JsonDocument.Parse(o.ItemsJson);
+                            if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                                count = doc.RootElement.GetArrayLength();
+                        }
+                    }
+                    catch { /* ignore malformed json */ }
+
+                    return new OrderListVM
+                    {
+                        PartitionKey = o.PartitionKey,
+                        RowKey = o.RowKey,
+                        CustomerId = o.CustomerId ?? "",
+                        CustomerName = (o.CustomerId != null && nameById.TryGetValue(o.CustomerId, out var nm)) ? nm : (o.CustomerId ?? ""),
+                        Status = o.Status ?? "Pending",
+                        Total = o.Total,
+                        Timestamp = o.Timestamp,
+                        ItemsCount = count
+                    };
+                })
+                .ToList();
+
+            return View(model);
         }
 
         // GET /Orders/Details?pk=...&rk=...
@@ -54,106 +132,90 @@ namespace retailMvcDemo.Controllers
             return View(row);
         }
 
-        // ---------- Create (multi-product) ----------
-
-        // Populate dropdowns for Create GET and failed POST
-        private async Task PopulateDropdownsAsync()
-        {
-            var customers = new List<CustomerEntity>();
-            await foreach (var c in _customers.QueryAllAsync()) customers.Add(c);
-
-            ViewBag.Customers = customers
-                .OrderBy(c => c.LastName)
-                .Select(c => new SelectListItem($"{c.FirstName} {c.LastName}", c.RowKey))
-                .ToList();
-
-            var products = new List<ProductEntity>();
-            await foreach (var p in _products.QueryAllAsync()) products.Add(p);
-
-            ViewBag.Products = products
-                .OrderBy(p => p.Name)
-                .Select(p => new SelectListItem($"{p.Name} (R {p.Price:0.00})", p.RowKey))
-                .ToList();
-
-            ViewBag.Statuses = new List<SelectListItem>
-            {
-                new("Pending", "Pending"),
-                new("Processing", "Processing"),
-                new("Completed", "Completed"),
-                new("Cancelled", "Cancelled")
-            };
-        }
-
-        // GET /Orders/Create
-        public async Task<IActionResult> Create()
+        // ───────────────────────────── Create (GET) ─────────────────────────────
+        // Optional params let you preselect a product from the Products page
+        public async Task<IActionResult> Create(string? preselectProductId = null, int preselectQty = 1)
         {
             await PopulateDropdownsAsync();
+
             var vm = new OrderCreateVM
             {
                 Status = "Pending",
-                Items = new List<OrderCreateItemVM> { new OrderCreateItemVM { Quantity = 1 } }
+                Items = new List<OrderCreateItemVM>
+                {
+                    new OrderCreateItemVM { ProductId = preselectProductId, Quantity = Math.Max(1, preselectQty) }
+                }
             };
+
             return View(vm);
         }
 
-        // POST /Orders/Create (multi-product; preserves selections on error)
+        // ───────────────────────────── Create (POST) ────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(OrderCreateVM vm)
         {
-            if (vm.Items == null || vm.Items.Count == 0)
-                ModelState.AddModelError("", "Add at least one product.");
+            await PopulateDropdownsAsync();
 
-            // Validate customer
-            CustomerEntity? customer = null;
-            await foreach (var c in _customers.QueryAllAsync())
-                if (c.RowKey == vm.CustomerId) { customer = c; break; }
-
-            if (customer == null)
-                ModelState.AddModelError("", "Selected customer not found.");
-
-            if (!ModelState.IsValid)
+            if (vm == null)
             {
-                await PopulateDropdownsAsync();
-                return View(vm); // preserves user input
-            }
-
-            // Materialize products and compute total from authoritative prices
-            var allProducts = new List<ProductEntity>();
-            await foreach (var p in _products.QueryAllAsync()) allProducts.Add(p);
-
-            var lines = new List<object>();
-            double total = 0;
-
-            foreach (var item in vm.Items.Where(i => !string.IsNullOrWhiteSpace(i.ProductId) && i.Quantity > 0))
-            {
-                var prod = allProducts.FirstOrDefault(p => p.RowKey == item.ProductId);
-                if (prod == null)
-                {
-                    ModelState.AddModelError("", "One or more selected products no longer exist.");
-                    await PopulateDropdownsAsync();
-                    return View(vm);
-                }
-
-                lines.Add(new { sku = prod.RowKey, name = prod.Name, qty = item.Quantity, price = prod.Price });
-                total += item.Quantity * prod.Price;
-            }
-
-            if (lines.Count == 0)
-            {
-                ModelState.AddModelError("", "Add at least one valid product with quantity > 0.");
-                await PopulateDropdownsAsync();
+                ModelState.AddModelError("", "Invalid order.");
                 return View(vm);
             }
 
-            var itemsJson = JsonSerializer.Serialize(lines);
+            if (string.IsNullOrWhiteSpace(vm.CustomerId))
+                ModelState.AddModelError(nameof(vm.CustomerId), "Please select a customer.");
+
+            // Normalize items: keep only rows with a product and qty > 0
+            vm.Items = vm.Items
+                .Where(i => !string.IsNullOrWhiteSpace(i.ProductId) && i.Quantity > 0)
+                .ToList();
+
+            if (vm.Items.Count == 0)
+                ModelState.AddModelError("", "Add at least one product with quantity.");
+
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            // Validate customer exists
+            CustomerEntity? customer = null;
+            await foreach (var c in _customers.QueryAllAsync())
+            {
+                if (c.RowKey == vm.CustomerId) { customer = c; break; }
+            }
+            if (customer == null)
+            {
+                ModelState.AddModelError(nameof(vm.CustomerId), "Selected customer not found.");
+                return View(vm);
+            }
+
+            // Build authoritative line items from product table (ensure price from DB)
+            var lines = new List<object>();
+            double total = 0;
+
+            foreach (var item in vm.Items)
+            {
+                ProductEntity? product = null;
+                await foreach (var p in _products.QueryAllAsync())
+                {
+                    if (p.RowKey == item.ProductId) { product = p; break; }
+                }
+                if (product == null)
+                {
+                    ModelState.AddModelError("", "One or more products no longer exist.");
+                    return View(vm);
+                }
+
+                lines.Add(new { sku = product.RowKey, name = product.Name, qty = item.Quantity, price = product.Price });
+                total += product.Price * item.Quantity;
+            }
 
             var order = new OrderEntity
             {
                 PartitionKey = $"CUSTOMER-{vm.CustomerId}",
                 RowKey = Guid.NewGuid().ToString("N"),
-                CustomerId = vm.CustomerId!,
-                ItemsJson = itemsJson,
+                CustomerId = vm.CustomerId,
+                ItemsJson = JsonSerializer.Serialize(lines),
                 Total = total,
                 Status = string.IsNullOrWhiteSpace(vm.Status) ? "Pending" : vm.Status
             };
@@ -170,13 +232,13 @@ namespace retailMvcDemo.Controllers
                 utc = DateTime.UtcNow
             });
 
-            // Queue: inventory-reserve per line (optional but useful)
-            foreach (var item in vm.Items.Where(i => !string.IsNullOrWhiteSpace(i.ProductId) && i.Quantity > 0))
+            // Queue: inventory reservations per item
+            foreach (var item in vm.Items)
             {
                 await _queue.EnqueueOrderAsync(new
                 {
                     type = "inventory-reserve",
-                    productId = item.ProductId!,
+                    productId = item.ProductId,
                     qty = item.Quantity,
                     orderId = order.RowKey,
                     utc = DateTime.UtcNow
@@ -186,8 +248,7 @@ namespace retailMvcDemo.Controllers
             return RedirectToAction(nameof(Index), new { customerId = vm.CustomerId });
         }
 
-        // ---------- Edit / Delete (unchanged behavior) ----------
-
+        // ───────────────────────────── Edit Status ──────────────────────────────
         public async Task<IActionResult> Edit(string pk, string rk)
         {
             var row = await _orders.GetAsync(pk, rk);
@@ -209,7 +270,7 @@ namespace retailMvcDemo.Controllers
             return RedirectToAction(nameof(Index), new { customerId = cid });
         }
 
-        // GET /Orders/Delete?pk=...&rk=...
+        // ───────────────────────────── Delete ───────────────────────────────────
         public async Task<IActionResult> Delete(string pk, string rk)
         {
             var row = await _orders.GetAsync(pk, rk);
@@ -229,6 +290,33 @@ namespace retailMvcDemo.Controllers
             await _orders.DeleteAsync(pk, rk);
             return RedirectToAction(nameof(Index), new { customerId = cid });
         }
-    }
 
+        // ───────────────────────────── helpers ──────────────────────────────────
+        private async Task PopulateDropdownsAsync()
+        {
+            // Customers dropdown (Id + "First Last")
+            var customers = new List<CustomerEntity>();
+            await foreach (var c in _customers.QueryAllAsync()) customers.Add(c);
+            ViewBag.Customers = customers
+                .OrderBy(c => c.LastName)
+                .Select(c => new { Id = c.RowKey, Name = $"{c.FirstName} {c.LastName}" })
+                .ToList();
+
+            // Products dropdown (RowKey + display)
+            var products = new List<ProductEntity>();
+            await foreach (var p in _products.QueryAllAsync()) products.Add(p);
+            ViewBag.Products = products
+                .OrderBy(p => p.Name)
+                .Select(p => new
+                {
+                    Rk = p.RowKey,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Display = $"{p.Name} (R {p.Price:0.00})"
+                })
+                .ToList();
+
+            ViewBag.Statuses = new[] { "Pending", "Processing", "Completed", "Cancelled" };
+        }
+    }
 }

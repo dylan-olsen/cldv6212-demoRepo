@@ -1,33 +1,52 @@
 ﻿@model retailMvcDemo.Models.ProductEntity
 @{
     ViewData["Title"] = "Product Details";
+    var cat = Model.PartitionKey?.StartsWith("CATEGORY-") == true
+        ? Model.PartitionKey["CATEGORY-".Length..]
+        : Model.PartitionKey;
 }
-<h2>Product Details</h2>
 
-<table class="table">
-    <tr><th>Name</th><td>@Model.Name</td></tr>
-    <tr><th>Price</th><td>@Model.Price</td></tr>
-    <tr><th>Stock</th><td>@Model.StockQty</td></tr>
-    <tr><th>Category (PartitionKey)</th><td>@Model.PartitionKey</td></tr>
-    <tr><th>SKU/ID (RowKey)</th><td>@Model.RowKey</td></tr>
-    <tr>
-        <th>Image</th>
-        <td>
-            @if (!string.IsNullOrWhiteSpace(Model.ImageBlobUrl))
-            {
-                <img src="@Model.ImageBlobUrl" alt="img" style="max-height:160px;width:auto;border-radius:6px;" />
-                <div><a href="@Model.ImageBlobUrl" target="_blank">Open image</a></div>
-            }
-            else
-            {
+<h2 class="mb-3">@ViewData["Title"]</h2>
 
-                <span>(no image)</span>
-            }
-        </td>
-    </tr>
-</table>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="ratio ratio-16x9">
+                @if (!string.IsNullOrWhiteSpace(Model.ImageBlobUrl))
+                {
+                    <img src="@Model.ImageBlobUrl" class="img-fluid" alt="@Model.Name" />
+                }
+                else
+                {
+                    <div class="bg-light d-flex align-items-center justify-content-center">
+                        <span class="text-muted">No image</span>
+                    </div>
+                }
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">@Model.Name</h4>
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <p class="card-text text-muted">@Model.Description</p>
+                }
 
-<p>
-    <a asp-action="Edit" asp-route-pk="@Model.PartitionKey" asp-route-rk="@Model.RowKey" class="btn btn-primary">Edit</a>
-    <a asp-action="Index" class="btn btn-secondary">Back</a>
-</p>
+                <p class="mb-1"><strong>Category:</strong> @cat</p>
+                <p class="mb-1"><strong>Price:</strong> R @Model.Price.ToString("0.00")</p>
+                <p class="mb-1"><strong>Stock:</strong> @Model.StockQty</p>
+            </div>
+            <div class="card-footer bg-white border-0">
+                <div class="dropstart">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Actions
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="@Url.Action("Edit", "Products", new { pk = Model.PartitionKey, rk = Model.RowKey })">Edit</a></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><a class="dropdown-item text-danger" href="@Url.Action("Delete", "Products", new { pk = Model.PartitionKey, rk = Model.RowKey })">Delete</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "Products")">Back to List</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

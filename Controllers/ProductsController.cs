@@ -55,14 +55,45 @@ namespace retailMvcDemo.Controllers
         public async Task<IActionResult> Create(
             string category, string name, double price, int stockQty, IFormFile? imageFile)
         {
-            string? imageUrl = null;
+            // basic requireds
+            if (string.IsNullOrWhiteSpace(category) || string.IsNullOrWhiteSpace(name))
+            {
+                // keep form filled + show error
+                ViewBag.Category = category;
+                ViewBag.Name = name;
+                ViewBag.Price = price;
+                ViewBag.StockQty = stockQty;
 
+                // IMPORTANT: key must match the input's name attr (lowercase "name")
+                ModelState.AddModelError("name", "Category and Name are required.");
+                return View();
+            }
+
+            // prevent duplicate product name in same category
+            var pk = $"CATEGORY-{category.ToUpper()}";
+            await foreach (var existing in _products.QueryByPartitionAsync(pk))
+            {
+                if (existing.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    // keep form filled + show field-level error
+                    ViewBag.Category = category;
+                    ViewBag.Name = name;
+                    ViewBag.Price = price;
+                    ViewBag.StockQty = stockQty;
+
+                    // IMPORTANT: use "name" not "Name" to bind to the free-form input
+                    ModelState.AddModelError("name", "A product with this name already exists in this category.");
+                    return View();
+                }
+            }
+
+            string? imageUrl = null;
             if (imageFile != null && imageFile.Length > 0)
             {
                 imageUrl = await _blobs.UploadFileAsync(imageFile);
             }
 
-            var entity = _products.Build(category, name, price, stockQty, imageUrl); // no sku
+            var entity = _products.Build(category, name, price, stockQty, imageUrl);
             await _products.AddAsync(entity);
 
             // ───────────── Queue messages ─────────────
@@ -70,7 +101,7 @@ namespace retailMvcDemo.Controllers
             {
                 type = "product-created",
                 productId = entity.RowKey,
-                category = entity.PartitionKey,   // e.g. CATEGORY-GROCERY
+                category = entity.PartitionKey,
                 name = entity.Name,
                 price = entity.Price,
                 hasImage = !string.IsNullOrWhiteSpace(entity.ImageBlobUrl),
@@ -109,6 +140,20 @@ namespace retailMvcDemo.Controllers
             var row = await _products.GetAsync(pk, rk);
             if (row == null) return NotFound();
 
+            // prevent renaming to clash with another product in same category
+            var pkCheck = row.PartitionKey;
+            await foreach (var existing in _products.QueryByPartitionAsync(pkCheck))
+            {
+                if (existing.RowKey != rk &&
+                    existing.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    // IMPORTANT: key must match the input name in your Edit view
+                    ModelState.AddModelError("name", "Another product with this name already exists in this category.");
+                    // keep current row so view stays filled
+                    return View(row);
+                }
+            }
+
             // Update basic fields
             row.Name = name;
             row.Price = price;
@@ -117,15 +162,12 @@ namespace retailMvcDemo.Controllers
             // Replace image if a new one was uploaded
             if (newImageFile != null && newImageFile.Length > 0)
             {
-                // delete old
                 if (!string.IsNullOrWhiteSpace(existingImageUrl))
                     await _blobs.DeleteFileAsync(existingImageUrl);
 
-                // upload new
                 var newUrl = await _blobs.UploadFileAsync(newImageFile);
                 row.ImageBlobUrl = newUrl;
 
-                // queue: image replaced
                 await _queue.EnqueueOrderAsync(new
                 {
                     type = "product-image-replaced",
@@ -137,7 +179,6 @@ namespace retailMvcDemo.Controllers
 
             await _products.UpdateAsync(row);
 
-            // Derive category hint from PK so Index can filter (optional)
             var categoryHint = row.PartitionKey.StartsWith("CATEGORY-")
                 ? row.PartitionKey.Substring("CATEGORY-".Length)
                 : null;
@@ -160,7 +201,6 @@ namespace retailMvcDemo.Controllers
         {
             var row = await _products.GetAsync(pk, rk);
 
-            // Clean up blob if present
             if (row != null && !string.IsNullOrWhiteSpace(row.ImageBlobUrl))
             {
                 await _blobs.DeleteFileAsync(row.ImageBlobUrl);
@@ -168,7 +208,6 @@ namespace retailMvcDemo.Controllers
 
             await _products.DeleteAsync(pk, rk);
 
-            // queue: product deleted (optional partition key included for traceability)
             await _queue.EnqueueOrderAsync(new
             {
                 type = "product-deleted",
