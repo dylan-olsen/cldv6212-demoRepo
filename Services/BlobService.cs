@@ -7,37 +7,77 @@ namespace retailMvcDemo.Services
     public interface IBlobService
     {
         Task<string> UploadFileAsync(IFormFile file);
-        Task DeleteFileAsync(string fileUrl);
+        Task<bool> DeleteFileAsync(string urlOrName);
     }
 
     public class BlobService : IBlobService
     {
-        private readonly BlobServiceClient _blobServiceClient;
-        private readonly string? _containerName;
+        private readonly BlobContainerClient _container;
 
-        public BlobService(IConfiguration configuration)
+        public BlobService(IConfiguration cfg)
         {
-            _blobServiceClient = new BlobServiceClient(configuration["AzureBlobStorage:ConnectionString"]);
-            _containerName = configuration["AzureBlobStorage:ContainerName"];
+            // Connection string & container name
+            var conn = cfg.GetSection("AzureBlobStorage")["ConnectionString"]
+                      ?? cfg.GetConnectionString("AzureStorage");
 
-            if (string.IsNullOrEmpty(_containerName))
-                throw new InvalidOperationException("Container name is not configured.");
+            var containerName = cfg.GetSection("AzureBlobStorage")["ContainerName"]
+                             ?? "product-images";
+
+            _container = new BlobContainerClient(conn, containerName);
+            _container.CreateIfNotExists(); // no public flag
         }
 
         public async Task<string> UploadFileAsync(IFormFile file)
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-            var blobClient = containerClient.GetBlobClient(Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
-            await blobClient.UploadAsync(file.OpenReadStream());
-            return blobClient.Uri.ToString();
+            if (file == null || file.Length <= 0)
+                throw new ArgumentException("File is empty.");
+
+            var ext = Path.GetExtension(file.FileName);
+            var name = Path.GetFileNameWithoutExtension(file.FileName);
+            if (string.IsNullOrWhiteSpace(name)) name = "image";
+
+            var blobName = $"{Sanitize(name)}_{Guid.NewGuid():N}{ext}";
+            var blob = _container.GetBlobClient(blobName);
+
+            await blob.UploadAsync(file.OpenReadStream(), new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders { ContentType = file.ContentType }
+            });
+
+            return blob.Uri.ToString(); // store direct URL
         }
 
-        public async Task DeleteFileAsync(string fileUrl)
+        public async Task<bool> DeleteFileAsync(string urlOrName)
         {
-            var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-            var blobName = Path.GetFileName(new Uri(fileUrl).LocalPath);
-            var blobClient = containerClient.GetBlobClient(blobName);
-            await blobClient.DeleteIfExistsAsync();
+            if (string.IsNullOrWhiteSpace(urlOrName)) return false;
+
+            var blobName = TryExtractBlobName(urlOrName) ?? urlOrName.Trim();
+            var blob = _container.GetBlobClient(blobName);
+
+            var resp = await blob.DeleteIfExistsAsync();
+            return resp.Value;
+        }
+
+        // --- helpers ---
+        private static string Sanitize(string input)
+        {
+            var cleaned = new string(input.Select(ch =>
+                char.IsLetterOrDigit(ch) || ch is '-' or '_' ? ch : '-'
+            ).ToArray());
+
+            return string.IsNullOrWhiteSpace(cleaned) ? "image" : cleaned.ToLowerInvariant();
+        }
+
+        private string? TryExtractBlobName(string maybeUrl)
+        {
+            if (Uri.TryCreate(maybeUrl, UriKind.Absolute, out var uri))
+            {
+                var segments = uri.Segments;
+                if (segments?.Length > 0)
+                    return Uri.UnescapeDataString(segments[^1]);
+            }
+            return null;
         }
     }
 }
+

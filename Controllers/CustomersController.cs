@@ -44,33 +44,41 @@ namespace retailMvcDemo.Controllers
         }
 
         // GET /Customers/Create
-        public IActionResult Create() => View();
+        public IActionResult Create()
+        {
+            // Use a fresh model so TagHelpers bind correctly
+            return View(new CustomerEntity());
+        }
 
-        // POST /Customers/Create
+        // POST /Customers/Create  (uses DataAnnotations on CustomerEntity)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string firstName, string lastName, string email, string phone, string city)
+        public async Task<IActionResult> Create(CustomerEntity model)
         {
-            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(city))
-            {
-                ModelState.AddModelError("", "First name, last name, and city are required.");
-                return View();
-            }
+            // NOTE: City is optional on the model, but required for PartitionKey
+            if (string.IsNullOrWhiteSpace(model.City))
+                ModelState.AddModelError(nameof(CustomerEntity.City), "City is required.");
 
-            var entity = _customers.Build(firstName, lastName, email, phone, city);
-            await _customers.AddAsync(entity);
+            if (!ModelState.IsValid)
+                return View(model); // show validation messages inline
+
+            // Build keys
+            model.PartitionKey = $"CITY-{model.City!.Trim().ToUpper()}";
+            model.RowKey = Guid.NewGuid().ToString("N");
+
+            await _customers.AddAsync(model);
 
             // queue: customer-created
             await _queue.EnqueueOrderAsync(new
             {
                 type = "customer-created",
-                customerId = entity.RowKey,
-                cityPartition = entity.PartitionKey,  // e.g., CITY-DURBAN
-                name = $"{entity.FirstName} {entity.LastName}",
+                customerId = model.RowKey,
+                cityPartition = model.PartitionKey,
+                name = $"{model.FirstName} {model.LastName}",
                 utc = DateTime.UtcNow
             });
 
-            return RedirectToAction(nameof(Index), new { city });
+            return RedirectToAction(nameof(Index), new { city = model.City });
         }
 
         // GET /Customers/Edit?pk=...&rk=...
@@ -78,40 +86,49 @@ namespace retailMvcDemo.Controllers
         {
             var row = await _customers.GetAsync(pk, rk);
             if (row == null) return NotFound();
+            // Populate City from PK if needed
+            if (string.IsNullOrWhiteSpace(row.City) && pk.StartsWith("CITY-"))
+                row.City = pk.Substring("CITY-".Length);
             return View(row);
         }
 
         // POST /Customers/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string pk, string rk, string firstName, string lastName, string email, string phone, string city)
+        public async Task<IActionResult> Edit(CustomerEntity model)
         {
-            var row = await _customers.GetAsync(pk, rk);
-            if (row == null) return NotFound();
+            // Model contains keys bound from hidden inputs
+            if (string.IsNullOrWhiteSpace(model.City))
+                ModelState.AddModelError(nameof(CustomerEntity.City), "City is required.");
 
-            row.FirstName = firstName;
-            row.LastName = lastName;
-            row.Email = email;
-            row.Phone = phone;
+            if (!ModelState.IsValid)
+                return View(model);
 
-            // If city changed, we should move partitions (Table Storage requires re-insert)
-            var newPk = $"CITY-{city.ToUpper()}";
-            if (!string.Equals(row.PartitionKey, newPk, StringComparison.OrdinalIgnoreCase))
+            var existing = await _customers.GetAsync(model.PartitionKey, model.RowKey);
+            if (existing == null) return NotFound();
+
+            existing.FirstName = model.FirstName;
+            existing.LastName = model.LastName;
+            existing.Email = model.Email;
+            existing.Phone = model.Phone;
+            existing.City = model.City;
+
+            // Detect city change (partition move)
+            var newPk = $"CITY-{model.City!.Trim().ToUpper()}";
+            if (!string.Equals(existing.PartitionKey, newPk, StringComparison.OrdinalIgnoreCase))
             {
-                // delete old row and create a new one with same RowKey in new partition
-                var preservedRk = row.RowKey;
-
-                await _customers.DeleteAsync(row.PartitionKey, row.RowKey);
-                row.PartitionKey = newPk;
-                row.RowKey = preservedRk; // keep same ID
-                await _customers.AddAsync(row);
+                var preservedRk = existing.RowKey;
+                await _customers.DeleteAsync(existing.PartitionKey, existing.RowKey);
+                existing.PartitionKey = newPk;
+                existing.RowKey = preservedRk;
+                await _customers.AddAsync(existing);
             }
             else
             {
-                await _customers.UpdateAsync(row);
+                await _customers.UpdateAsync(existing);
             }
 
-            return RedirectToAction(nameof(Index), new { city });
+            return RedirectToAction(nameof(Index), new { city = model.City });
         }
 
         // GET /Customers/Delete?pk=...&rk=...
@@ -129,7 +146,6 @@ namespace retailMvcDemo.Controllers
         {
             await _customers.DeleteAsync(pk, rk);
 
-            // queue: customer-deleted
             await _queue.EnqueueOrderAsync(new
             {
                 type = "customer-deleted",

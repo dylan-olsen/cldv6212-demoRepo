@@ -1,52 +1,92 @@
 ﻿@model IEnumerable<retailMvcDemo.Models.ProductEntity>
 @{
     ViewData["Title"] = "Products";
-    string CategoryFromPk(string pk) =>
-        pk != null && pk.StartsWith("CATEGORY-") ? pk.Substring("CATEGORY-".Length) : pk ?? "";
+    string? category = Context.Request.Query["category"];
 }
 
-<h2>Products</h2>
+<h2 class="mb-3">@ViewData["Title"]</h2>
 
-<p>
-    <a asp-action="Create" class="btn btn-sm btn-success">Create New</a>
-</p>
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <form method="get" class="d-flex gap-2 align-items-center">
+        <label for="category" class="form-label mb-0">Category</label>
+        <input type="text" class="form-control" id="category" name="category" value="@category" placeholder="e.g. Grocery" style="max-width:200px" />
+        <button class="btn btn-primary" type="submit">Filter</button>
+        <a class="btn btn-secondary" href="@Url.Action("Index", "Products")">Clear</a>
+    </form>
+</div>
 
-<table class="table table-striped table-hover align-middle">
-    <thead>
-        <tr>
-            <th style="width:72px;">Image</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th class="text-end">Price</th>
-            <th class="text-end">Stock</th>
-            <th>PK</th>
-            <th>RK</th>
-            <th style="width:200px;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in Model)
-        {
-            <tr>
-                <td>
-                    @if (!string.IsNullOrWhiteSpace(p.ImageBlobUrl))
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-3">
+    <!-- + New Product card -->
+    <div class="col">
+        <a class="card h-100 text-decoration-none border-2 border-dashed d-flex align-items-center justify-content-center"
+           href="@Url.Action("Create", "Products")"
+           style="border-style: dashed;">
+            <div class="text-center p-4">
+                <div class="display-6">+</div>
+                <div class="mt-1">New Product</div>
+            </div>
+        </a>
+    </div>
+
+    @foreach (var p in Model)
+    {
+        var hasImg = !string.IsNullOrWhiteSpace(p.ImageBlobUrl);
+        var cat = p.PartitionKey?.StartsWith("CATEGORY-") == true ? p.PartitionKey["CATEGORY-".Length..] : p.PartitionKey;
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <!-- Uniform image area without custom CSS -->
+                <div class="ratio ratio-16x9">
+                    @if (hasImg)
                     {
-                        <img src="@p.ImageBlobUrl" alt="img" style="height:48px;width:auto;border-radius:4px;" />
+                        <img src="@p.ImageBlobUrl" alt="@p.Name" class="img-fluid" />
                     }
-                </td>
-                <td>@p.Name</td>
-                <td>@CategoryFromPk(p.PartitionKey)</td>
-                <td class="text-end">@p.Price.ToString("0.00")</td>
-                <td class="text-end">@p.StockQty</td>
-                <td>@p.PartitionKey</td>
-                <td>@p.RowKey</td>
-                <td>
-                    <a asp-action="Details" asp-route-pk="@p.PartitionKey" asp-route-rk="@p.RowKey" class="btn btn-sm btn-outline-secondary">Details</a>
-                    <a asp-action="Edit" asp-route-pk="@p.PartitionKey" asp-route-rk="@p.RowKey" class="btn btn-sm btn-primary">Edit</a>
-                    <a asp-action="Delete" asp-route-pk="@p.PartitionKey" asp-route-rk="@p.RowKey" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                    else
+                    {
+                        <div class="bg-light d-flex align-items-center justify-content-center">
+                            <span class="text-muted">No image</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="card-body pb-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="card-title mb-0 text-truncate" title="@p.Name">@p.Name</h5>
+                        <span class="badge text-bg-light">@cat</span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(p.Description))
+                    {
+                        <p class="card-text text-muted small mb-2 text-truncate" title="@p.Description">@p.Description</p>
+                    }
+
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">R @p.Price.ToString("0.00")</span>
+                        <span>Stock: @p.StockQty</span>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white border-0 pt-0">
+                    <div class="dropstart">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("Details", "Products", new { pk = p.PartitionKey, rk = p.RowKey })">Details</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="@Url.Action("Edit", "Products", new { pk = p.PartitionKey, rk = p.RowKey })">Edit</a>
+                            </li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="@Url.Action("Delete", "Products", new { pk = p.PartitionKey, rk = p.RowKey })">Delete</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
