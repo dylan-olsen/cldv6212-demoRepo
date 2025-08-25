@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "dgSpecHash": "F02+jx+euvo=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\dylan\\source\\repos\\VC COLLEGE\\retailMvcDemo\\retailMvcDemo.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\dylan\\.nuget\\packages\\azure.core\\1.47.2\\azure.core.1.47.2.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\azure.data.tables\\12.11.0\\azure.data.tables.12.11.0.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\azure.storage.blobs\\12.25.0\\azure.storage.blobs.12.25.0.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\azure.storage.common\\12.24.0\\azure.storage.common.12.24.0.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\8.0.0\\microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.3\\microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\system.clientmodel\\1.6.0\\system.clientmodel.1.6.0.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\system.io.hashing\\8.0.0\\system.io.hashing.8.0.0.nupkg.sha512",
+    "C:\\Users\\dylan\\.nuget\\packages\\system.memory.data\\8.0.1\\system.memory.data.8.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

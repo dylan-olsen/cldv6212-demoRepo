@@ -1,0 +1,39 @@
+﻿@model retailMvcDemo.Models.CustomerEntity
+@{
+    ViewData["Title"] = "Edit Customer";
+}
+<h2>Edit Customer</h2>
+
+<form asp-action="Edit" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <!-- keys must travel with the form -->
+    <input type="hidden" name="pk" value="@Model.PartitionKey" />
+    <input type="hidden" name="rk" value="@Model.RowKey" />
+    <input type="hidden" name="city" value="@Model.City" />
+
+    <div class="col-md-6">
+        <label class="form-label">First Name</label>
+        <input name="firstName" class="form-control" value="@Model.FirstName" />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Last Name</label>
+        <input name="lastName" class="form-control" value="@Model.LastName" />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Email</label>
+        <input name="email" class="form-control" value="@Model.Email" />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Phone</label>
+        <input name="phone" class="form-control" value="@Model.Phone" />
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">City</label>
+        <input name="city" class="form-control" value="@Model.City" />
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" asp-route-city="@Model.City" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>

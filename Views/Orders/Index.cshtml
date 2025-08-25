@@ -1,0 +1,42 @@
+﻿@model IEnumerable<retailMvcDemo.Models.OrderEntity>
+@{
+    ViewData["Title"] = "Orders";
+    string CustomerFromPk(string pk) =>
+        pk != null && pk.StartsWith("CUSTOMER-") ? pk.Substring("CUSTOMER-".Length) : pk ?? "";
+}
+<h2>Orders</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-sm btn-success">Create Order</a>
+</p>
+
+<table class="table table-striped table-hover align-middle">
+    <thead>
+        <tr>
+            <th>CustomerId</th>
+            <th>OrderId</th>
+            <th class="text-end">Total</th>
+            <th>Status</th>
+            <th>Timestamp</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in Model)
+        {
+            <tr>
+                <td>@CustomerFromPk(o.PartitionKey)</td>
+                <td>@o.RowKey</td>
+                <td class="text-end">@o.Total.ToString("0.00")</td>
+                <td>@o.Status</td>
+                <td>@o.Timestamp</td>
+                <td>
+                    <a asp-action="Details" asp-route-pk="@o.PartitionKey" asp-route-rk="@o.RowKey" class="btn btn-sm btn-outline-secondary">Details</a>
+                    <a asp-action="Edit" asp-route-pk="@o.PartitionKey" asp-route-rk="@o.RowKey" class="btn btn-sm btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-pk="@o.PartitionKey" asp-route-rk="@o.RowKey" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

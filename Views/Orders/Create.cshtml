@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Create Order";
+    var customers = (IEnumerable<dynamic>)ViewBag.Customers;
+    var products = (IEnumerable<dynamic>)ViewBag.Products;
+    var statuses = (IEnumerable<string>)ViewBag.Statuses;
+}
+<h2>Create Order</h2>
+
+<form asp-action="Create" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+
+    <div class="col-md-6">
+        <label class="form-label">Customer</label>
+        <select name="customerId" class="form-select" required>
+            <option value="">-- select customer --</option>
+            @foreach (var c in customers)
+            {
+                <option value="@c.Id">@c.Name (@c.Id)</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Product</label>
+        <select name="productRowKey" class="form-select" required>
+            <option value="">-- select product --</option>
+            @foreach (var p in products)
+            {
+                <option value="@p.Rk">@p.Display</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Quantity</label>
+        <input type="number" name="quantity" min="1" value="1" class="form-control" required />
+    </div>
+
+    <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+            @foreach (var s in statuses)
+            {
+                <option value="@s">@s</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+

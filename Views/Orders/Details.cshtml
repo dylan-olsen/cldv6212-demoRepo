@@ -1,0 +1,21 @@
+﻿@model retailMvcDemo.Models.OrderEntity
+@{
+    ViewData["Title"] = "Order Details";
+    string CustomerFromPk(string pk) =>
+        pk != null && pk.StartsWith("CUSTOMER-") ? pk.Substring("CUSTOMER-".Length) : pk ?? "";
+}
+<h2>Order Details</h2>
+
+<table class="table">
+    <tr><th>CustomerId</th><td>@CustomerFromPk(Model.PartitionKey)</td></tr>
+    <tr><th>OrderId</th><td>@Model.RowKey</td></tr>
+    <tr><th>Total</th><td>@Model.Total.ToString("0.00")</td></tr>
+    <tr><th>Status</th><td>@Model.Status</td></tr>
+    <tr><th>ItemsJson</th><td><pre>@Model.ItemsJson</pre></td></tr>
+    <tr><th>Last Updated</th><td>@Model.Timestamp</td></tr>
+</table>
+
+<p>
+    <a asp-action="Edit" asp-route-pk="@Model.PartitionKey" asp-route-rk="@Model.RowKey" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" asp-route-customerId="@Model.CustomerId" class="btn btn-secondary">Back</a>
+</p>

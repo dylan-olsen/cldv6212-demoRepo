@@ -1,0 +1,31 @@
+﻿@model retailMvcDemo.Models.CustomerEntity
+@{
+    ViewData["Title"] = "Delete Customer";
+}
+<h2>Delete Customer</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete <strong>@Model.FirstName @Model.LastName</strong>?
+</div>
+
+<dl class="row">
+    <dt class="col-sm-2">Email</dt>
+    <dd class="col-sm-10">@Model.Email</dd>
+    <dt class="col-sm-2">Phone</dt>
+    <dd class="col-sm-10">@Model.Phone</dd>
+    <dt class="col-sm-2">City</dt>
+    <dd class="col-sm-10">@Model.City</dd>
+    <dt class="col-sm-2">PK</dt>
+    <dd class="col-sm-10">@Model.PartitionKey</dd>
+    <dt class="col-sm-2">RK</dt>
+    <dd class="col-sm-10">@Model.RowKey</dd>
+</dl>
+
+<form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="pk" value="@Model.PartitionKey" />
+    <input type="hidden" name="rk" value="@Model.RowKey" />
+    <input type="hidden" name="city" value="@Model.City" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" asp-route-city="@Model.City" class="btn btn-secondary">Cancel</a>
+</form>

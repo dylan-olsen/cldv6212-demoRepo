@@ -1,0 +1,25 @@
+﻿@model retailMvcDemo.Models.OrderEntity
+@{
+    ViewData["Title"] = "Delete Order";
+    string CustomerFromPk(string pk) =>
+        pk != null && pk.StartsWith("CUSTOMER-") ? pk.Substring("CUSTOMER-".Length) : pk ?? "";
+}
+<h2>Delete Order</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete Order <strong>@Model.RowKey</strong> for Customer <strong>@CustomerFromPk(Model.PartitionKey)</strong>?
+</div>
+
+<table class="table">
+    <tr><th>Total</th><td>@Model.Total.ToString("0.00")</td></tr>
+    <tr><th>Status</th><td>@Model.Status</td></tr>
+    <tr><th>ItemsJson</th><td><pre>@Model.ItemsJson</pre></td></tr>
+</table>
+
+<form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="pk" value="@Model.PartitionKey" />
+    <input type="hidden" name="rk" value="@Model.RowKey" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" asp-route-customerId="@Model.CustomerId" class="btn btn-secondary">Cancel</a>
+</form>

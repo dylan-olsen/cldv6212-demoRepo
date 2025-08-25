@@ -1,0 +1,33 @@
+﻿@model retailMvcDemo.Models.ProductEntity
+@{
+    ViewData["Title"] = "Product Details";
+}
+<h2>Product Details</h2>
+
+<table class="table">
+    <tr><th>Name</th><td>@Model.Name</td></tr>
+    <tr><th>Price</th><td>@Model.Price</td></tr>
+    <tr><th>Stock</th><td>@Model.StockQty</td></tr>
+    <tr><th>Category (PartitionKey)</th><td>@Model.PartitionKey</td></tr>
+    <tr><th>SKU/ID (RowKey)</th><td>@Model.RowKey</td></tr>
+    <tr>
+        <th>Image</th>
+        <td>
+            @if (!string.IsNullOrWhiteSpace(Model.ImageBlobUrl))
+            {
+                <img src="@Model.ImageBlobUrl" alt="img" style="max-height:160px;width:auto;border-radius:6px;" />
+                <div><a href="@Model.ImageBlobUrl" target="_blank">Open image</a></div>
+            }
+            else
+            {
+
+                <span>(no image)</span>
+            }
+        </td>
+    </tr>
+</table>
+
+<p>
+    <a asp-action="Edit" asp-route-pk="@Model.PartitionKey" asp-route-rk="@Model.RowKey" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</p>
